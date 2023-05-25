@@ -1,46 +1,44 @@
-pipeline {
-    agent any
+pipeline{
+  agent any
+    
+  environment{
+      ANSIBLE_CONFIG="$(WORKSPACE)/deploy/ansible.cfg"
+    }
 
-  stages {
-    stage('Build') {
-      steps {
-        script {
-          sh 'echo "Building Stage"'
+  stages{
+    stage("initial cleanup") {
+        steps {
+          dir("${WORKSPACE}") {
+            deleteDir()
+          }
         }
+    }
+  }
+
+    stage("Checkout SCM") {
+      steps{
+        git branch: 'feature/jpstages', url: 'https://github.com/MayorFaj/ansible-project.git'
       }
     }
 
-    stage('Test') {
-      steps {
-        script {
-          sh 'echo "Testing Stage"'
-        }
+    stage ("Prepare ansible for execution") {
+      steps{
+        sh 'echo ${WORKSPACE}'
+        sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
       }
     }
 
-    stage('Package') {
-      steps {
-        script {
-          sh 'echo "Packaging Stage"'
-        }
+    stage ("Run ansible playbook") {
+      steps{
+        ansiblePlaybook become: true, colorized: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev', playbook: 'playbooks/site.yml'
       }
     }
 
-    stage('Deploy') {
-      steps {
-        script {
-          sh 'echo "Deployment Stage"'
-        }
+    stage("clean workspace after build") {
+      steps{
+        cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
       }
+    }
     }
 
-    stage('Clean Up') {
-      steps {
-        script {
-          sh 'echo "Cleaning Stage"'
-        }
-      }
-    }
-    }
 }
-
