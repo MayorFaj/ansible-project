@@ -1,9 +1,7 @@
 
 ---
-
 - name:  webserver role for tooling website
   import_playbook: ../static-assignments/webserver.yml 
-
 
 
 - name: import nginx role
