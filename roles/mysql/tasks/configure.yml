@@ -63,6 +63,7 @@
   command: "touch {{ mysql_log_error }}"
   args:
     creates: "{{ mysql_log_error }}"
+    warn: false
   when:
     - mysql_log | default(true)
     - mysql_log_error | default(false)
