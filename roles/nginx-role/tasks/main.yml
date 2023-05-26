@@ -14,20 +14,15 @@
     name: nginx
     state: started
 
-- name: Insert configuration file in server block
+- name: install PHP
   become: yes
-  blockinfile:
-     path: /etc/nginx/nginx.conf
-     block: "{{ lookup('file', '../templates/nginx.conf' ) }}"
-     insertafter: "http {"
-
-
-- name: Comment out site-enabled
-  become: yes
-  replace:
-     path: /etc/nginx/nginx.conf
-     regexp: '(.*enabled.*)'
-     replace: '#\1'
+  yum:
+    name:
+      - php 
+      - php-mysqlnd
+      - php-gd 
+      - php-curl
+    state: present
 
      
          
