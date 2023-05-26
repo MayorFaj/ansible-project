@@ -15,6 +15,7 @@
     state: started
 
 - name: install PHP
+  become: yes
   yum:
     name:
       - php 
