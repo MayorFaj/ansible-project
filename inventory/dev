@@ -5,8 +5,5 @@
 [nginx]
 172.31.28.163 ansible_ssh_user='ec2-user'
 
-[db:vars]
-ansible_python_interpreter=/usr/bin/python
-
 [db]
 172.31.23.238 ansible_ssh_user='ec2-user'
