@@ -23,20 +23,6 @@
       - php-curl
     state: present
 
-- name: Insert configuration file in server block
-  become: yes
-  blockinfile:
-     path: /etc/nginx/nginx.conf
-     block: "{{ lookup('file', '../templates/nginx.conf' ) }}"
-     insertafter: "http {"
-
-
-- name: Comment out site-enabled
-  become: yes
-  replace:
-     path: /etc/nginx/nginx.conf
-     regexp: '(.*enabled.*)'
-     replace: '#\1'
      
          
   notify: Restart nginx service
