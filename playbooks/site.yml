@@ -5,8 +5,9 @@
 - name:  webserver role for tooling website
   import_playbook: ../static-assignments/webservers.yml 
 
-#- name: import nginx role
-#  import_playbook: ../static-assignments/nginx.yml
+- hosts: nginx
+- name: import nginx role
+  import_playbook: ../static-assignments/nginx.yml
 
 - hosts: db
 - name: import database file
