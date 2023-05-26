@@ -2,3 +2,4 @@
 - hosts: nginx
   roles:
     - nginx-role
+  become: yes
