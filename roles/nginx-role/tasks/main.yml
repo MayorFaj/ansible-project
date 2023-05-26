@@ -14,6 +14,15 @@
     name: nginx
     state: started
 
+- name: install PHP
+  yum:
+    name:
+      - php 
+      - php-mysqlnd
+      - php-gd 
+      - php-curl
+    state: present
+
 - name: Insert configuration file in server block
   become: yes
   blockinfile:
@@ -28,7 +37,6 @@
      path: /etc/nginx/nginx.conf
      regexp: '(.*enabled.*)'
      replace: '#\1'
-
      
          
   notify: Restart nginx service
