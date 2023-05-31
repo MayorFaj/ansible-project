@@ -1,18 +1,18 @@
 
 ---
 
-#- hosts: tooling
-#- name:  webserver role for tooling website
-#  import_playbook: ../static-assignments/webservers.yml 
+- hosts: tooling
+- name:  webserver role for tooling website
+  import_playbook: ../static-assignments/webservers.yml 
 
 
-#- hosts: nginx
-#- name:  nginx role 
-#  import_playbook: ../static-assignments/nginx.yml 
+- hosts: nginx
+- name:  nginx role 
+  import_playbook: ../static-assignments/nginx.yml 
 
-#- hosts: db
-#- name: import database file
-#  import_playbook: ../static-assignments/database.yml
+- hosts: db
+- name: import database file
+  import_playbook: ../static-assignments/database.yml
 
 - hosts: jenkins
 - name: import jenkins file
