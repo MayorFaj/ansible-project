@@ -1,4 +1,5 @@
 ---
 - hosts: artifactory
-  roles: artifactoryrole
+  roles:
+    - artifactoryrole
   become: yes

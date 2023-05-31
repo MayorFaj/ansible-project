@@ -20,4 +20,4 @@
 
 - hosts: artifactory
 - name: import artifactory file
-  import_playbook: ../static-assignments/artifact.yml
+  import_playbook: ../static-assignments/artifactory.yml
