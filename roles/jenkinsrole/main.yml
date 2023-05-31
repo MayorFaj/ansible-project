@@ -1,0 +1,20 @@
+---
+- name: install PHP and dependencies
+  become: yes
+  apt:
+    name: '{{ item }}'
+    state: present
+    with_items:
+      - zip
+      - libapache2-mod-php
+      - phploc
+      - php-xml
+      - php-bcmath
+      - php-bz2
+      - php-intl
+      - php-gd
+      - php-mbstring
+      - php-mysql
+      - php-zip
+
+  

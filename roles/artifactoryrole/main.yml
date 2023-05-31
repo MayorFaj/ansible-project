@@ -1,0 +1,39 @@
+---
+- name: install Gnupg2 package
+  become: yes
+  apt:
+    name: gnupg2
+    state: present
+    update_cache: yes
+
+- name: download JFrog GPG key
+  become: yes
+  shell: wget -qO - https://api.bintray.com/orgs/jfrog/keys/gpg/public.key
+  register: wget_output
+
+- name: Add JFrog GPG Public Key to APT
+  become: yes
+  shell: "echo '{{ wget_output.stdout }}' | apt-key add -"
+
+- name: add the JFrog Artifactory repository
+  become: yes
+  lineinfile:
+    path: /etc/apt/sources.list.d/jfrog.list
+    line: "deb https://jfrog.bintray.com/artifactory-debs bionic main"
+
+- name: update the repository and install JFrog 
+  become: yes
+  apt:
+    name: jfrog-artifactory-oss
+    state: present
+    update_cache: yes
+
+- name: start the Artifactory service and enable
+  become: yes
+  service:
+    name: artifactory
+    state: started
+    enabled: yes
+
+
+

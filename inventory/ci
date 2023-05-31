@@ -7,5 +7,5 @@
 [sonarqube]
 <SonarQube-Private-IP-Address>
 
-[artifact_repository]
-<Artifact_repository-Private-IP-Address>
+[artifactory]
+172.31.20.86    ansible_user='ubuntu'
