@@ -14,9 +14,9 @@
 #- name: import database file
 #  import_playbook: ../static-assignments/database.yml
 
-- hosts: jenkins
-- name: import jenkins file
-  import_playbook: ../static-assignments/jenkins.yml
+#- hosts: jenkins
+#- name: import jenkins file
+#  import_playbook: ../static-assignments/jenkins.yml
 
 - hosts: artifactory
 - name: import artifactory file
