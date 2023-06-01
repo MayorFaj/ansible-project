@@ -4,7 +4,7 @@
   apt:
     name: '{{ item }}'
     state: present
-    loop:
+    with_items:
       - zip
       - libapache2-mod-php
       - phploc
