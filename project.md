@@ -166,7 +166,7 @@ Our goal here is to deploy the application onto servers directly from Artifactor
 
 `https://github.com/darey-devops/php-todo.git`
 
-2. On you Jenkins server, install PHP, its dependencies and Composer tool.
+2. On your Jenkins server, install PHP, its dependencies and Composer tool.
 
 `sudo apt install -y zip libapache2-mod-php phploc php-{xml,bcmath,bz2,intl,gd,mbstring,mysql,zip}`
 
@@ -178,9 +178,69 @@ Our goal here is to deploy the application onto servers directly from Artifactor
 
 4. In Jenkins UI configure Artifactory, configure the server ID, URL and Credentials, run Test Connection.
 
-![Jfrog Conf](./images2/Jfrog%20configurration.png)
 
 ![Jfrog page](./images2/JfrogPage.png)
+
+- Configure the server ID, URL and Credentials, run Test Connection.
+
+![jfrog server configure](./images2/jfogserver%20config2.png)
+
+### Integrate Artifactory repository with Jenkins
+
+1. Create a dummy Jenkinsfile in the repository
+
+2. Using Blue Ocean, create a multibranch Jenkins pipeline
+
+3. On the database server, create database and user
+
+```
+Create database homestead;
+CREATE USER 'homestead'@'%' IDENTIFIED BY 'sePret^i';
+GRANT ALL PRIVILEGES ON * . * TO 'homestead'@'%';
+```
+
+4. Update the database connectivity requirements in the file .env.sample
+
+5. Update Jenkinsfile with proper pipeline configuration
+
+```
+pipeline {
+    agent any
+
+  stages {
+
+     stage("Initial cleanup") {
+          steps {
+            dir("${WORKSPACE}") {
+              deleteDir()
+            }
+          }
+        }
+
+    stage('Checkout SCM') {
+      steps {
+            git branch: 'main', url: 'https://github.com/darey-devops/php-todo.git'
+      }
+    }
+
+    stage('Prepare Dependencies') {
+      steps {
+             sh 'mv .env.sample .env'
+             sh 'composer install'
+             sh 'php artisan migrate'
+             sh 'php artisan db:seed'
+             sh 'php artisan key:generate'
+      }
+    }
+  }
+}
+```
+
+
+
+
+
+
 
 
 
