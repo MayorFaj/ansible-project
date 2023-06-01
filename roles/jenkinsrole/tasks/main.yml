@@ -2,9 +2,7 @@
 - name: install PHP and dependencies
   become: yes
   apt:
-    name: '{{ item }}'
-    state: present
-    loop:
+    name:
       - zip
       - libapache2-mod-php
       - phploc
@@ -16,5 +14,6 @@
       - php-mbstring
       - php-mysql
       - php-zip
+    state: present
 
   
