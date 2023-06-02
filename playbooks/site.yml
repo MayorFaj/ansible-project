@@ -12,7 +12,7 @@
 
 - hosts: db
 - name: import database file
- import_playbook: ../static-assignments/database.yml
+  import_playbook: ../static-assignments/database.yml
 
 #- hosts: jenkins
 #- name: import jenkins assignment
