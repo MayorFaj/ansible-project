@@ -204,6 +204,7 @@ GRANT ALL PRIVILEGES ON * . * TO 'homestead'@'%';
 
 4. Update the database connectivity requirements in the file `.env.sample` with your IP address.
 
+
 5. Update Jenkinsfile with proper pipeline configuration (in the PHP repo)
 
 ```
