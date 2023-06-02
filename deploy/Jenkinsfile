@@ -20,7 +20,7 @@ pipeline{
 
     stage("Checkout SCM") {
       steps{
-        git branch: 'feature/jpstages', url: 'https://github.com/MayorFaj/ansible-project.git'
+        git branch: 'main', url: 'https://github.com/MayorFaj/ansible-project.git'
       }
     }
 
