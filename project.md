@@ -160,7 +160,7 @@ We already have tooling website as a part of deployment through Ansible. Here we
 Our goal here is to deploy the application onto servers directly from Artifactory rather than from git. Update your Ansible with Artifactory role.
 
 
-### Prepare Jenkins
+### Phase 1: Prepare Jenkins
 
 1. Fork the repository below into your GitHub account
 
@@ -172,9 +172,12 @@ Our goal here is to deploy the application onto servers directly from Artifactor
 
 3. Install Jenkins Plugin
 
-- Plot plugin
+  1. Plot plugin
 
-- Artifactory plugin
+  2. Artifactory plugin
+
+- We will use plot plugin to display tests reports, and code coverage information.
+- The Artifactory plugin will be used to easily upload code artifacts into an Artifactory server.
 
 4. In Jenkins UI configure Artifactory, configure the server ID, URL and Credentials, run Test Connection.
 
@@ -185,9 +188,9 @@ Our goal here is to deploy the application onto servers directly from Artifactor
 
 ![jfrog server configure](./images2/jfogserver%20config2.png)
 
-### Integrate Artifactory repository with Jenkins
+### Phase 2: Integrate Artifactory repository with Jenkins
 
-1. Create a dummy Jenkinsfile in the repository
+1. Create a dummy Jenkinsfile in the repository (in the PHP repo)
 
 2. Using Blue Ocean, create a multibranch Jenkins pipeline
 
@@ -199,9 +202,9 @@ CREATE USER 'homestead'@'%' IDENTIFIED BY 'sePret^i';
 GRANT ALL PRIVILEGES ON * . * TO 'homestead'@'%';
 ```
 
-4. Update the database connectivity requirements in the file .env.sample
+4. Update the database connectivity requirements in the file `.env.sample` with your IP address.
 
-5. Update Jenkinsfile with proper pipeline configuration
+5. Update Jenkinsfile with proper pipeline configuration (in the PHP repo)
 
 ```
 pipeline {
@@ -219,7 +222,7 @@ pipeline {
 
     stage('Checkout SCM') {
       steps {
-            git branch: 'main', url: 'https://github.com/darey-devops/php-todo.git'
+            git branch: 'main', url: 'https://github.com/MayorFaj/php-todo.git'
       }
     }
 
@@ -235,9 +238,35 @@ pipeline {
   }
 }
 ```
+- ensure composer is installed on the system where you're running the command (in this case the Jenkins server)
 
+```
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+```
 
+Notice the Prepare Dependencies section
 
+- The required file by PHP is .env so we are renaming .env.sample to .env
+- Composer is used by PHP to install all the dependent libraries used by the application
+- php artisan uses the .env file to setup the required database objects – (After successful run of this step, login to the database, run show tables and you will see the tables being created for you).
+
+![php and dependencies]()
+
+Update the Jenkinsfile to include Unit tests step
+
+```
+stage('Execute Unit Tests') {
+      steps {
+             sh './vendor/bin/phpunit'
+      } 
+```
+
+### Phase 3 – Code Quality Analysis
+
+- For PHP the most commonly tool used for code quality analysis is phploc.
+
+The data produced by phploc can be ploted onto graphs in Jenkins
 
 
 
