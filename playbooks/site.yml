@@ -10,14 +10,19 @@
 #- name:  nginx role 
 #  import_playbook: ../static-assignments/nginx.yml 
 
-- hosts: db
-- name: import database file
-  import_playbook: ../static-assignments/database.yml
+# - hosts: db
+# - name: import database file
+#   import_playbook: ../static-assignments/database.yml
 
 #- hosts: jenkins
 #- name: import jenkins assignment
 #  import_playbook: ../static-assignments/jenkins.yml
 
-- hosts: artifactory
-- name: import artifactory assignment
-  import_playbook: ../static-assignments/artifactory.yml
+# - hosts: artifactory
+# - name: import artifactory assignment
+#   import_playbook: ../static-assignments/artifactory.yml
+
+- hosts: todo
+- name: deploy the todo assignment
+  import_playbook: ../static-assignments/deployment.yml
+
