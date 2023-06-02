@@ -373,9 +373,128 @@ stage ('Deploy to Dev Environment') {
 The build job used in this step tells Jenkins to start another job. In this case it is the ansible-project job, and we are targeting the main branch. Hence, we have ansible-project/main. Since the Ansible project requires parameters to be passed in, we have included this by specifying the parameters section. The name of the parameter is env and its value is dev. Meaning, deploy to the Development environment.
 
 
-
-![tododeploy](./images2/todo_app%20page.png)
-
-But how are we certain that the code being deployed has the quality that meets corporate and customer requirements? Even though we have implemented Unit Tests and Code Coverage Analysis with phpunit and phploc, we still need to implement Quality Gate to ensure that ONLY code with the required code coverage, and other quality standards make it through to the environments.
+But how are we certain that the code being deployed has the quality that meets corporate and customer requirements? Even though  `Unit Tests` and `Code Coverage Analysis` have been implemented with phpunit and phploc, there is need to implement `Quality Gate` to ensure that ONLY code with the required code coverage, and other quality standards make it through to the environments.
 
 To achieve this, we need to configure SonarQube – An open-source platform developed by SonarSource for continuous inspection of code quality to perform automatic reviews with static analysis of code to detect bugs, code smells, and security vulnerabilities.
+
+## Install Sonarqube
+
+- SonarQube is a tool that can be used to create quality gates for software projects, and the ultimate goal is to be able to ship only quality software code.
+
+- Despite that DevOps CI/CD pipeline helps with fast software delivery, it is of the same importance to ensure the quality of such delivery. Hence, we will need SonarQube to set up Quality gates.
+
+- Install SonarQube on Ubuntu 20.04 With PostgreSQL as Backend Database
+
+- We will make some Linux Kernel configuration changes to ensure optimal performance of the tool – we will increase `vm.max_map_count`, `f`ile discriptor` and `ulimit`.
+
+**Tune Linux Kernel**
+
+This can be achieved by making session changes which does not persist beyond the current session terminal
+
+```
+sudo sysctl -w vm.max_map_count=262144
+sudo sysctl -w fs.file-max=65536
+ulimit -n 65536
+ulimit -u 4096
+```
+
+To make a permanent change, edit the file `/etc/security/limits.conf` and append the below
+
+```
+sonarqube   -   nofile   65536
+sonarqube   -   nproc    4096
+```
+
+- Before installing, update and upgrade system packages
+
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
+
+- Install `wget` and `unzip` packages
+
+`sudo apt-get install wget unzip -y`
+
+- Install OpenJDK and Java Runtime Environment (JRE) 11
+
+ ```
+ sudo apt-get install openjdk-11-jdk -y
+ sudo apt-get install openjdk-11-jre -y
+ ```
+
+- Set default JDK – To set default JDK or switch to OpenJDK enter below command:
+
+`sudo update-alternatives --config java`
+
+## Install and Setup PostgreSQL 10 Database for SonarQube
+
+- The command below will add PostgreSQL repo to the repo list:
+
+```
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+```
+
+- Download PostgreSQL software
+
+`wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -`
+
+- Install PostgreSQL Database Server
+
+`sudo apt-get -y install postgresql postgresql-contrib`
+
+- Start PostgreSQL Database Server
+
+`sudo systemctl start postgresql`
+
+- Enable it to start automatically at boot time
+
+`sudo systemctl enable postgresql`
+
+- Change the password for default postgres user (Pass in the password you intend to use, and remember to save it somewhere)
+
+`sudo passwd postgres`
+
+- Switch to the postgres user
+
+`su - postgres`
+
+- Create a new user by typing
+
+`createuser sonar`
+
+- Switch to the PostgreSQL shell
+
+`psql`
+
+- Set a password for the newly created user for SonarQube database
+
+`ALTER USER sonar WITH ENCRYPTED password 'sonar';`
+
+- Create a new database for PostgreSQL database by running:
+
+`CREATE DATABASE sonarqube OWNER sonar;`
+
+- Grant all privileges to sonar user on sonarqube Database.
+
+`grant all privileges on DATABASE sonarqube to sonar;`
+
+- Exit from the psql shell:
+
+`\q`
+
+- Switch back to the sudo user by running the exit command.
+
+`exit`
+
+- Navigate to the tmp directory to temporarily download the installation files
+
+`cd /tmp && sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.9.3.zip`
+
+- Unzip the archive setup to `/opt directory`
+
+`sudo unzip sonarqube-7.9.3.zip -d /opt`
+
+- Move extracted setup to /opt/sonarqube directory
+
+`sudo mv /opt/sonarqube-7.9.3 /opt/sonarqube`

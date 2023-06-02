@@ -1,0 +1,5 @@
+---
+- hosts: sonarqube
+  roles:
+    - sonarquberole
+  become: yes

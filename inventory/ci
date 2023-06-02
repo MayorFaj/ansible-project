@@ -1,11 +1,11 @@
-[jenkins]
-172.31.16.48 ansible_user='ubuntu'
+# [jenkins]
+# 172.31.16.48 ansible_user='ubuntu'
 
 #[nginx]
 #172.31.28.163 ansible_user='ec2-user'
 
-#[sonarqube]
-#<SonarQube-Private-IP-Address>
+[sonarqube]
+172.31.7.26
 
-[artifactory]
-172.31.9.143   ansible_user='ec2-user'
+# [artifactory]
+# 172.31.9.143   ansible_user='ec2-user'
