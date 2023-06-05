@@ -10,111 +10,38 @@ CONTINUOUS INTEGRATION WITH JENKINS | ANSIBLE | ARTIFACTORY | SONARQUBE | PHP
 
 3. Create a new pipeline
 
-![new pipeline](./images/new%20pipeline.png)
-
 4. Select Github
-
-![selectgithub](./images/select%20github.png)
 
 5. Connect Jenkins with GitHub
 
-![connect jenins with github](./images/jenkins%20with%20git.png)
-
 6. Login to GitHub & Generate an Access Token 
-
-![generate token](./images/generate%20token.png)
 
 7. Paste generated Access Token and connect
 
-![paste-token](./images/paste-token.png)
-
 8. Create a new Pipeline
-
-![create-pipeline](./images/create-pipeline.png)
-
-
-At this point you may not have a Jenkinsfile in the Ansible repository, so Blue Ocean will attempt to give you some guidance to create one. But we do not need that. We will rather create one ourselves.Click on Administration to exit the Blue Ocean console.
-
-Here is the newly created pipeline. It takes the name of your GitHub repository.
-
-![new pipeline](./images/new-pipeline.png)
 
 - Inside the Ansible project, create a new directory deploy and start a new file Jenkinsfile inside the directory.
 
 
 
 
-```
-pipeline {
-    agent any
-
-  stages {
-    stage("Initial cleanup") {
-      steps {
-        dir("${WORKSPACE}"){
-          deleteDir()
-        }
-      }
-    }
-
-    stage('Build') {
-      steps {
-        script {
-          sh 'echo "Building Stage"'
-        }
-      }
-    }
-
-    stage('Test') {
-      steps {
-        script {
-          sh 'echo "Testing Stage"'
-        }
-      }
-    }
-
-    stage('Package') {
-      steps {
-        script {
-          sh 'echo "Packaging Stage"'
-        }
-      }
-    }
-
-    stage('Deploy') {
-      steps {
-        script {
-          sh 'echo "Deployment Stage"'
-        }
-      }
-    }
-
-    stage('Clean Up') {
-      steps {
-        script {
-          sh 'echo "Cleaning Stage"'
-        }
-      }
-    }
-
-    stage("cleanup") {
-      steps {
-        cleanWs()
-       }
-    }
-}
-
-
-```
-
 ## RUNNING ANSIBLE PLAYBOOK FROM JENKINS
 
-1. Installing Ansible on Jenkins
+1. Install Ansible on Jenkins
+
 2. Install Ansible plugin in Jenkins UI
 
 - Parameterizing Jenkinsfile For Ansible Deployment
 
-To deploy to other environments, we will need to use parameters.
+Jenkins needs to export the `ANSIBLE_CONFIG` environment variable. You can put the `.ansible.cfg` file alongside Jenkinsfile in the deploy directory. This way, anyone can easily identify that everything in there relates to deployment. Then, using the Pipeline Syntax tool in Ansible, generate the syntax to create environment variables to set.
+
+**Note**:
+
+`ansible.cfg` must be exported to environment variable so that Ansible knows where to find Roles, but because you will possibly run Jenkins from different git branches, the location of Ansible roles will change. this should be handleddynamically. You can use Linux `Stream Editor sed` to update the section `roles_path` each time there is an execution
+
+Ensure that the Jenkinsfile is started with a clean up step to always delete the previous workspace before running a new one
+
+environments, we will need to use parameters.
 
 1. Update `sit` inventory with new servers
 
@@ -149,6 +76,7 @@ pipeline {
 
 3. In the Ansible execution section, remove the hardcoded inventory/dev and replace with `inventory/${inventory}
 
+
 From now on, each time you hit on execute, it will expect an input.
 
 Notice that the default value loads up, but we can now specify which environment we want to deploy the configuration to. Simply type sit and hit Run.
@@ -177,6 +105,7 @@ Our goal here is to deploy the application onto servers directly from Artifactor
   2. Artifactory plugin
 
 - We will use plot plugin to display tests reports, and code coverage information.
+
 - The Artifactory plugin will be used to easily upload code artifacts into an Artifactory server.
 
 4. In Jenkins UI configure Artifactory, configure the server ID, URL and Credentials, run Test Connection.
@@ -244,10 +173,7 @@ pipeline {
 ```
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
-composer --version
 ```
-
-![prepare dependencies](.)
 
 Notice the Prepare Dependencies section
 
@@ -383,7 +309,9 @@ To achieve this, we need to configure SonarQube – An open-source platform deve
 
 - Despite that DevOps CI/CD pipeline helps with fast software delivery, it is of the same importance to ensure the quality of such delivery. Hence, we will need SonarQube to set up Quality gates.
 
-- Install SonarQube on Ubuntu 20.04 With PostgreSQL as Backend Database
+- ### Install SonarQube on Ubuntu 20.04 With PostgreSQL as Backend Database
+
+Below is a manual approach to the installation (Refer to the `Sonaqube role` for the ansible playbook).
 
 - We will make some Linux Kernel configuration changes to ensure optimal performance of the tool – we will increase `vm.max_map_count`, `f`ile discriptor` and `ulimit`.
 
@@ -805,8 +733,6 @@ stage('SonarQube Quality Gate') {
         }
     }
 ```
-
-To test, create different branches and push to GitHub. You will realise that only branches other than develop, hotfix, release, main, or master will be able to deploy the code.
 
 If everything goes well, you should be able to see something like this:
 
