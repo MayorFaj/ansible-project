@@ -18,15 +18,15 @@
 #- name: import jenkins assignment
 #  import_playbook: ../static-assignments/jenkins.yml
 
-# - hosts: artifactory
-# - name: import artifactory assignment
-#   import_playbook: ../static-assignments/artifactory.yml
+- hosts: artifactory
+- name: import artifactory assignment
+  import_playbook: ../static-assignments/artifactory.yml
 
 # - hosts: todo
 # - name: deploy the todo assignment
 #   import_playbook: ../static-assignments/deployment.yml
 
-- hosts: sonarqube
-- name: import sonarqube assignment
-  import_playbook: ../static-assignments/sonarqube.yml
+# - hosts: sonarqube
+# - name: import sonarqube assignment
+#   import_playbook: ../static-assignments/sonarqube.yml
 
