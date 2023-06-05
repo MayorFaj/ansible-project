@@ -22,9 +22,9 @@
 - name: import artifactory assignment
   import_playbook: ../static-assignments/artifactory.yml
 
-# - hosts: todo
-# - name: deploy the todo assignment
-#   import_playbook: ../static-assignments/deployment.yml
+- hosts: todo
+- name: deploy the todo assignment
+  import_playbook: ../static-assignments/deployment.yml
 
 # - hosts: sonarqube
 # - name: import sonarqube assignment
