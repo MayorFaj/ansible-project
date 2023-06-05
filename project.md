@@ -597,8 +597,8 @@ Started SonarQube
 
 - Check SonarQube running status:
 
-```
-./sonar.sh status
+
+`./sonar.sh status`
 
 Sample Output below:
 
@@ -684,9 +684,138 @@ Login to SonarQube with default administrator username and password – admin
 
 ### CONFIGURE SONARQUBE AND JENKINS FOR QUALITY GATE
 
-- In Jenkins, install SonarQube Scanner plugin
+- In Jenkins, install SonarQubeScanner plugin
 
 - Navigate to configure system in Jenkins. Add SonarQube server as shown below:
 
 
-8d578f7d24d1ed3d5684342a8b624848e9993b83
+`Manage Jenkins > Configure System`
+
+![config](./images2/mj1.png)
+
+- Generate authentication token in SonarQube
+
+`User > My Account > Security > Generate Tokens`
+
+![config2](./images2/mj2.png)
+
+- Configure Quality Gate Jenkins Webhook in SonarQube – The URL should point to your Jenkins server http://{JENKINS_HOST}/sonarqube-webhook/
+
+`Administration > Configuration > Webhooks > Create`
+
+![config3](./images2/mj3a.png)
+
+- Setup SonarQube scanner from Jenkins – Global Tool Configuration
+
+`Manage Jenkins > Global Tool Configuration`
+
+![config](./images2/mj4.png)
+
+### Update Jenkins Pipeline to include SonarQube scanning and Quality Gate
+
+Below is the snippet for a Quality Gate stage in Jenkinsfile.
+
+```
+stage('SonarQube Quality Gate') {
+        environment {
+            scannerHome = tool 'SonarQubeScanner'
+        }
+        steps {
+            withSonarQubeEnv('sonarqube') {
+                sh "${scannerHome}/bin/sonar-scanner"
+            }
+
+        }
+    }
+```
+
+**NOTE:** The above step will fail because we have not updated `sonar-scanner.properties
+
+- Configure sonar-scanner.properties – From the step above, Jenkins will install the scanner tool on the Linux server. You will need to go into the tools directory on the server to configure the properties file in which SonarQube will require to function during pipeline execution.
+
+`cd /var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/conf/`
+
+- Add configuration related to php-todo project
+
+```
+sonar.host.url=http://<SonarQube-Server-IP-address>:9000/sonar
+sonar.projectKey=php-todo
+#----- Default source code encoding
+sonar.sourceEncoding=UTF-8
+sonar.php.exclusions=**/vendor/**
+sonar.php.coverage.reportPaths=build/logs/clover.xml
+sonar.php.tests.reportPath=build/logs/junit.xml
+```
+
+![conf6](./images2/mj6a.png)
+
+- The quality gate we just included has no effect. Why? Well, because if you go to the SonarQube UI, you will realise that we just pushed a poor-quality code onto the development environment.
+
+- Navigate to php-todo project in SonarQube
+
+![config7](./images2/mj7.png)
+
+In the development environment, this is acceptable as developers will need to keep iterating over their code towards perfection. But as a DevOps engineer working on the pipeline, we must ensure that the quality gate step causes the pipeline to fail if the conditions for quality are not met.
+
+#### Conditionally deploy to higher environments
+In the real world, developers will work on feature branch in a repository (e.g., GitHub or GitLab). There are other branches that will be used differently to control how software releases are done. You will see such branches as:
+
+- Develop
+- Master or Main
+- (The * is a place holder for a version number, Jira Ticket name or some description. It can be something like Release-1.0.0)
+- Feature/*
+- Release/*
+- Hotfix/
+
+etc
+
+There is a very wide discussion around release strategy, and git branching strategies which in recent years are considered under what is known as GitFlow
+
+Assuming a basic gitflow implementation restricts only the develop branch to deploy code to Integration environment like sit.
+
+Let us update our `Jenkinsfile` to implement this:
+
+- First, we will include a`When` condition to run Quality Gate whenever the running branch is either `develop`, `hotfix`, `release`, `main`, or `master`
+
+`when { branch pattern: "^develop*|^hotfix*|^release*|^main*", comparator: "REGEXP"}`
+
+- Then we add a timeout step to wait for SonarQube to complete analysis and successfully finish the pipeline only when code quality is acceptable.
+
+```
+timeout(time: 1, unit: 'MINUTES') {
+        waitForQualityGate abortPipeline: true
+    }
+```
+
+- The complete stage will now look like this:
+
+```
+stage('SonarQube Quality Gate') {
+      when { branch pattern: "^develop*|^hotfix*|^release*|^main*", comparator: "REGEXP"}
+        environment {
+            scannerHome = tool 'SonarQubeScanner'
+        }
+        steps {
+            withSonarQubeEnv('sonarqube') {
+                sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties"
+            }
+            timeout(time: 1, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+    }
+```
+
+To test, create different branches and push to GitHub. You will realise that only branches other than develop, hotfix, release, main, or master will be able to deploy the code.
+
+If everything goes well, you should be able to see something like this:
+
+![fin ouput](./images2/fin_output.png)
+
+Notice that with the current state of the code, it cannot be deployed to Integration environments due to its quality. In the real world, DevOps engineers will push this back to developers to work on the code further, based on SonarQube quality report. Once everything is good with code quality, the pipeline will pass and proceed with sipping the codes further to a higher environment.
+
+
+
+
+
+
